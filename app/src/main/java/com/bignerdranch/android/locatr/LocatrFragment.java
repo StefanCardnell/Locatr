@@ -3,6 +3,7 @@ package com.bignerdranch.android.locatr;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -36,7 +37,7 @@ public class LocatrFragment extends Fragment {
 
     private static final String TAG = "LocatrFragment";
 
-    private static final String[] LOCATION_PERMISSIONS = new String[] {
+    private static final String[] LOCATION_PERMISSIONS = new String[]{
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
     };
@@ -60,7 +61,7 @@ public class LocatrFragment extends Fragment {
 
         mClient = new GoogleApiClient.Builder(getActivity())
             .addApi(LocationServices.API)
-            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks(){
+            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                 @Override
                 public void onConnected(@Nullable Bundle bundle) {
                     getActivity().invalidateOptionsMenu();
@@ -108,7 +109,7 @@ public class LocatrFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_locate:
                 findImage();
                 return true;
@@ -119,9 +120,9 @@ public class LocatrFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch(requestCode) {
+        switch (requestCode) {
             case REQUEST_LOCATION_PERMISSIONS:
-                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) findImage();
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) findImage();
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -130,7 +131,7 @@ public class LocatrFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
-        if (resultCode != Activity.RESULT_OK){
+        if (resultCode != Activity.RESULT_OK) {
             return;
         }
 
@@ -141,7 +142,7 @@ public class LocatrFragment extends Fragment {
     }
 
     public void requestLocationPermissions(boolean displayRationale) {
-        if(displayRationale && shouldShowRequestPermissionRationale(LOCATION_PERMISSIONS[0])){
+        if (displayRationale && shouldShowRequestPermissionRationale(LOCATION_PERMISSIONS[0])) {
             PermissionRationaleFragment dialog = new PermissionRationaleFragment();
             dialog.setTargetFragment(LocatrFragment.this, REQUEST_PERM_RATIONALE);
             dialog.show(getFragmentManager(), DIALOG_PERM_RATIONALE);
@@ -153,7 +154,7 @@ public class LocatrFragment extends Fragment {
     @SuppressLint("MissingPermission")
     private void findImage() {
 
-        if(!hasLocationPermission()) {
+        if (!hasLocationPermission()) {
             requestLocationPermissions(true);
             return;
         }
@@ -180,17 +181,24 @@ public class LocatrFragment extends Fragment {
     private class SearchTask extends AsyncTask<Location, Void, Void> {
         private GalleryItem mGalleryItem;
         private Bitmap mBitmap;
+        private ProgressDialog mProgressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            mProgressDialog = ProgressDialog
+                .show(getActivity(), null, getResources().getString(R.string.fetching_image));
+        }
 
         @Override
         protected Void doInBackground(Location... params) {
             FlickrFetchr fetchr = new FlickrFetchr();
             List<GalleryItem> items = fetchr.searchPhotos(params[0]);
 
-            if(items.size() == 0) return null;
+            if (items.size() == 0) return null;
 
             mGalleryItem = items.get(0);
 
-            try{
+            try {
                 byte[] bytes = fetchr.getUrlBytes(mGalleryItem.getUrl());
                 mBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             } catch (IOException ioe) {
@@ -203,6 +211,7 @@ public class LocatrFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             mImageView.setImageBitmap(mBitmap);
+            mProgressDialog.dismiss();
         }
     }
 }
