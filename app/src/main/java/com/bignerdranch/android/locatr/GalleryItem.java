@@ -7,12 +7,16 @@ public class GalleryItem {
     private String mId;
     private String mUrl;
     private String mOwner;
+    private Double mLat;
+    private Double mLon;
 
-    public GalleryItem(String caption, String id, String url, String owner){
+    public GalleryItem(String caption, String id, String url, String owner, Double lat, Double lon){
         mCaption = caption;
         mId = id;
         mUrl = url;
         mOwner = owner;
+        mLat = lat;
+        mLon = lon;
     }
 
     public String getCaption() {
@@ -45,6 +49,22 @@ public class GalleryItem {
 
     public void setOwner(String owner) {
         mOwner = owner;
+    }
+
+    public Double getLat() {
+        return mLat;
+    }
+
+    public void setLat(Double lat) {
+        mLat = lat;
+    }
+
+    public Double getLon() {
+        return mLon;
+    }
+
+    public void setLon(Double lon) {
+        mLon = lon;
     }
 
     @Override

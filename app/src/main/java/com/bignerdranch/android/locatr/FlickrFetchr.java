@@ -28,7 +28,7 @@ public class FlickrFetchr {
             .appendQueryParameter("api_key", API_KEY)
             .appendQueryParameter("format", "json")
             .appendQueryParameter("nojsoncallback", "1")
-            .appendQueryParameter("extras", "url_s")
+            .appendQueryParameter("extras", "url_s,geo")
             .build();
 
     private int mConnectTimeout;
@@ -85,6 +85,8 @@ public class FlickrFetchr {
                 public String title;
                 public String owner;
                 public String url_s;
+                public Double latitude;
+                public Double longitude;
             }
         }
     }
@@ -94,7 +96,7 @@ public class FlickrFetchr {
         FlickrResult flickrResult = gson.fromJson(jsonString, FlickrResult.class);
         for(int i = 0; i < flickrResult.photos.photo.length; ++i){
             FlickrResult.Photos.Photo photo = flickrResult.photos.photo[i];
-            items.add(new GalleryItem(photo.title, photo.id, photo.url_s, photo.owner));
+            items.add(new GalleryItem(photo.title, photo.id, photo.url_s, photo.owner, photo.latitude, photo.longitude));
         }
     }
 
